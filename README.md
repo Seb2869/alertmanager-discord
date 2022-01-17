@@ -3,7 +3,7 @@ alertmanager-discord
 
 Give this a webhook (with the DISCORD_WEBHOOK environment variable) and point it as a webhook on alertmanager, and it will post your alerts into a discord channel for you as they trigger:
 
-![](/.github/demo-new.png)
+![image](https://user-images.githubusercontent.com/74717373/149844720-16fb4a52-9109-4b4b-8c4d-d49b57c44660.png)
 
 ## Warning
 
