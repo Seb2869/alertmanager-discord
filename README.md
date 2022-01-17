@@ -3,7 +3,7 @@ alertmanager-discord
 
 Give this a webhook (with the DISCORD_WEBHOOK environment variable) and point it as a webhook on alertmanager, and it will post your alerts into a discord channel for you as they trigger:
 
-![image](https://user-images.githubusercontent.com/74717373/149844720-16fb4a52-9109-4b4b-8c4d-d49b57c44660.png)
+![image](https://user-images.githubusercontent.com/74717373/149845241-39dd888b-c2be-438d-b715-a3d165ed328d.png)
 
 ## Warning
 
@@ -56,7 +56,6 @@ receivers:
 # alerts
   - alert: mainnetError
     expr: (sum by(exported_job, exported_instance, error) (mainnet_error) > sum by(exported_job, exported_instance, error) (mainnet_error offset 2m)) or (sum by(exported_job, exported_instance, error) (mainnet_error) > 0 and sum by (exported_instance, exported_job, error) (count_over_time(mainnet_error[5m])) < 8)
-    #expr: avg by(exported_job, exported_instance, error) (mainnet_error)
     labels:
       job: hardworks
     annotations:
@@ -66,8 +65,7 @@ receivers:
       network: "{{ $labels.exported_instance }}"
 
   - alert: simulationError
-    expr: (sum by(exported_job, exported_instance, error) (simulation_error) > sum by(exported_job, exported_instance, error) (simulation_error offset 2m)) or (sum by(exported_job, exported_instance, error) (simulation_error) > 0 and sum by (exported_instance, exported_job, error) (count_over_time(simulation_error[5m])) < 8) 
-    #expr: avg by(exported_job, exported_instance, error) (simulation_error)
+    expr: (sum by(exported_job, exported_instance, error) (simulation_error) > sum by(exported_job, exported_instance, error) (simulation_error offset 2m)) or (sum by(exported_job, exported_instance, error) (simulation_error) > 0 and sum by (exported_instance, exported_job, error) (count_over_time(simulation_error[5m])) < 8)
     labels:
       job: hardworks
     annotations:
