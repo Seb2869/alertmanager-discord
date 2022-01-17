@@ -25,6 +25,9 @@ type alertManAlert struct {
 	Annotations struct {
 		Description string `json:"description"`
 		Summary     string `json:"summary"`
+		Error string `json:"error"`
+		Vault string `json:"vault"`
+		Network string `json:"network"`
 	} `json:"annotations"`
 	EndsAt       string            `json:"endsAt"`
 	GeneratorURL string            `json:"generatorURL"`
@@ -37,6 +40,9 @@ type alertManOut struct {
 	Alerts            []alertManAlert `json:"alerts"`
 	CommonAnnotations struct {
 		Summary string `json:"summary"`
+		Error string `json:"error"`
+		Vault string `json:"vault"`
+		Network string `json:"network"`
 	} `json:"commonAnnotations"`
 	CommonLabels struct {
 		Alertname string `json:"alertname"`
@@ -90,6 +96,19 @@ func checkWhURL(whURL string) {
 	}
 }
 
+func truncate(str string, length int) (truncated string) {
+    if length <= 0 {
+        return
+    }
+    for i, char := range str {
+        if i >= length {
+            break
+        }
+        truncated += string(char)
+    }
+    return
+}
+
 func sendWebhook(amo *alertManOut) {
 	groupedAlerts := make(map[string][]alertManAlert)
 
@@ -101,8 +120,8 @@ func sendWebhook(amo *alertManOut) {
 		DO := discordOut{}
 
 		RichEmbed := discordEmbed{
-			Title:       fmt.Sprintf("[%s:%d] %s", strings.ToUpper(status), len(alerts), amo.CommonLabels.Alertname),
-			Description: amo.CommonAnnotations.Summary,
+			Title:       fmt.Sprintf("🚨 %s", amo.CommonAnnotations.Summary),
+			Description: "details:",
 			Color:       ColorGrey,
 			Fields:      []discordEmbedField{},
 		}
@@ -113,10 +132,6 @@ func sendWebhook(amo *alertManOut) {
 			RichEmbed.Color = ColorGreen
 		}
 
-		if amo.CommonAnnotations.Summary != "" {
-			DO.Content = fmt.Sprintf(" === %s === \n", amo.CommonAnnotations.Summary)
-		}
-
 		for _, alert := range alerts {
 			realname := alert.Labels["instance"]
 			if strings.Contains(realname, "localhost") && alert.Labels["exported_instance"] != "" {
@@ -124,15 +139,26 @@ func sendWebhook(amo *alertManOut) {
 			}
 
 			RichEmbed.Fields = append(RichEmbed.Fields, discordEmbedField{
-				Name:  fmt.Sprintf("[%s]: %s on %s", strings.ToUpper(status), alert.Labels["alertname"], realname),
-				Value: alert.Annotations.Description,
+				Name:  fmt.Sprintf("[%s] %s", strings.ToUpper(alert.Annotations.Network), alert.Annotations.Vault),
+				Value: fmt.Sprintf("```\n%s\n```", truncate(alert.Annotations.Error, 1500)),
 			})
 		}
 
 		DO.Embeds = []discordEmbed{RichEmbed}
 
 		DOD, _ := json.Marshal(DO)
-		http.Post(*whURL, "application/json", bytes.NewReader(DOD))
+		resp, err := http.Post(*whURL, "application/json", bytes.NewReader(DOD))
+		if err != nil {
+                       log.Fatal(err)
+                }
+		defer resp.Body.Close()
+                body, err := ioutil.ReadAll(resp.Body)
+                if err != nil {
+                    log.Fatal(err)
+                }
+		if string(body) != "" {
+                    log.Println(string(body))
+	        }
 	}
 }
 

@@ -1,0 +1,16 @@
+[Unit]
+Description=Discord Alertmanager
+After=network.target auditd.service
+Wants=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/discord-alertmanager
+EnvironmentFile=/opt/discord-alertmanager/.env
+ExecStart=/opt/discord-alertmanager/alertmanager-discord
+Restart=always
+RestartSec=5s
+
+[Install]
+WantedBy=default.target
+

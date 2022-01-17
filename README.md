@@ -52,6 +52,30 @@ receivers:
 - name: 'discord_webhook'
   webhook_configs:
   - url: 'http://localhost:9094'
+
+# alerts
+  - alert: mainnetError
+    expr: (sum by(exported_job, exported_instance, error) (mainnet_error) > sum by(exported_job, exported_instance, error) (mainnet_error offset 2m)) or (sum by(exported_job, exported_instance, error) (mainnet_error) > 0 and sum by (exported_instance, exported_job, error) (count_over_time(mainnet_error[5m])) < 8)
+    #expr: avg by(exported_job, exported_instance, error) (mainnet_error)
+    labels:
+      job: hardworks
+    annotations:
+      error: "{{ $labels.error}}"
+      summary: "Error durign hardwork execution"
+      vault: "{{ $labels.exported_job }}"
+      network: "{{ $labels.exported_instance }}"
+
+  - alert: simulationError
+    expr: (sum by(exported_job, exported_instance, error) (simulation_error) > sum by(exported_job, exported_instance, error) (simulation_error offset 2m)) or (sum by(exported_job, exported_instance, error) (simulation_error) > 0 and sum by (exported_instance, exported_job, error) (count_over_time(simulation_error[5m])) < 8) 
+    #expr: avg by(exported_job, exported_instance, error) (simulation_error)
+    labels:
+      job: hardworks
+    annotations:
+      error: "{{ $labels.error}}"
+      summary: "Error durign hardwork simulation"
+      vault: "{{ $labels.exported_job }}"
+      network: "{{ $labels.exported_instance }}"
+
 ```
 
 ## Docker
