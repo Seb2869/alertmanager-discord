@@ -74,6 +74,25 @@ receivers:
       vault: "{{ $labels.exported_job }}"
       network: "{{ $labels.exported_instance }}"
 
+  - alert: positionAlert
+    expr: borrow_limit_percent > 0
+    labels:
+      job: positions
+    annotations:
+      summary: "Fuse Pool 24 position status"
+      vault: "using {{ $value | humanize }}% of borrow limit"
+      network: "{{ $labels.wallet }}"
+      error: "{{ $labels.wallet }} borrowed {{ with printf \"borrow{wallet='%s'}\" .Labels.wallet | query }}${{ . | first | value | humanize }}{{ end }} of borrow limit {{ with printf \"borrow_limit{wallet='%s'}\" .Labels.wallet | query }}${{ . | first | value | humanize }}{{ end }}. Total deposit {{ with printf \"supply{wallet='%s'}\" .Labels.wallet | query }}${{ . | first | value | humanize }}{{ end }}"
+
+  - alert: positionAlertHigh
+    expr: abs(delta(borrow_limit_percent[20m])) > 5
+    labels:
+      job: positions
+    annotations:
+      summary: "Fuse Pool 24 position status"
+      vault: "using {{ with printf \"borrow_limit_percent{wallet='%s'}\" .Labels.wallet | query }}${{ . | first | value | humanize }}{{ end }}% of borrow limit"
+      network: "{{ $labels.wallet }}"
+      error: "{{ $labels.wallet }} borrowed {{ with printf \"borrow{wallet='%s'}\" .Labels.wallet | query }}${{ . | first | value | humanize }}{{ end }} of borrow limit {{ with printf \"borrow_limit{wallet='%s'}\" .Labels.wallet | query }}${{ . | first | value | humanize }}{{ end }}. Total deposit {{ with printf \"supply{wallet='%s'}\" .Labels.wallet | query }}${{ . | first | value | humanize }}{{ end }}"
 ```
 
 ## Docker

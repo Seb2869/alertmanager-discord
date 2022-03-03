@@ -25,9 +25,9 @@ type alertManAlert struct {
 	Annotations struct {
 		Description string `json:"description"`
 		Summary     string `json:"summary"`
-		Error string `json:"error"`
-		Vault string `json:"vault"`
-		Network string `json:"network"`
+		Error       string `json:"error"`
+		Vault       string `json:"vault"`
+		Network     string `json:"network"`
 	} `json:"annotations"`
 	EndsAt       string            `json:"endsAt"`
 	GeneratorURL string            `json:"generatorURL"`
@@ -40,8 +40,8 @@ type alertManOut struct {
 	Alerts            []alertManAlert `json:"alerts"`
 	CommonAnnotations struct {
 		Summary string `json:"summary"`
-		Error string `json:"error"`
-		Vault string `json:"vault"`
+		Error   string `json:"error"`
+		Vault   string `json:"vault"`
 		Network string `json:"network"`
 	} `json:"commonAnnotations"`
 	CommonLabels struct {
@@ -97,16 +97,16 @@ func checkWhURL(whURL string) {
 }
 
 func truncate(str string, length int) (truncated string) {
-    if length <= 0 {
-        return
-    }
-    for i, char := range str {
-        if i >= length {
-            break
-        }
-        truncated += string(char)
-    }
-    return
+	if length <= 0 {
+		return
+	}
+	for i, char := range str {
+		if i >= length {
+			break
+		}
+		truncated += string(char)
+	}
+	return
 }
 
 func sendWebhook(amo *alertManOut) {
@@ -121,7 +121,7 @@ func sendWebhook(amo *alertManOut) {
 
 		RichEmbed := discordEmbed{
 			Title:       fmt.Sprintf("🚨 %s", amo.CommonAnnotations.Summary),
-			Description: "details:",
+			Description: "",
 			Color:       ColorGrey,
 			Fields:      []discordEmbedField{},
 		}
@@ -149,16 +149,16 @@ func sendWebhook(amo *alertManOut) {
 		DOD, _ := json.Marshal(DO)
 		resp, err := http.Post(*whURL, "application/json", bytes.NewReader(DOD))
 		if err != nil {
-                       log.Fatal(err)
-                }
+			log.Fatal(err)
+		}
 		defer resp.Body.Close()
-                body, err := ioutil.ReadAll(resp.Body)
-                if err != nil {
-                    log.Fatal(err)
-                }
+		body, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			log.Fatal(err)
+		}
 		if string(body) != "" {
-                    log.Println(string(body))
-	        }
+			log.Println(string(body))
+		}
 	}
 }
 
